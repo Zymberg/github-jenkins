@@ -1,0 +1,57 @@
+name: Deploy DAG and JAR to GCP
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "dags/**"
+      - "src/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up JDK for SBT
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - name: Set Up SBT
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
+
+      - name: Build JAR with SBT
+        run: |
+          sbt clean assembly
+        working-directory: .
+
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Upload DAG to GCP Bucket
+        run: |
+          gsutil cp dags/hello_world_dag.py gs://etl-suntory-example/dags/
+
+      - name: Upload JAR to GCP Bucket
+        run: |
+          gsutil cp target/scala-2.12/*.jar gs://etl-suntory-example/jars/
+
+      - name: Trigger Airflow DAG Run (Optional)
+        env:
+          AIRFLOW_URL: ${{ secrets.AIRFLOW_URL }}
+          AIRFLOW_USERNAME: ${{ secrets.AIRFLOW_USERNAME }}
+          AIRFLOW_PASSWORD: ${{ secrets.AIRFLOW_PASSWORD }}
+        run: |
+          curl -X POST "$AIRFLOW_URL/api/v1/dags/hello_world_dag/dagRuns" \
+          -H "Content-Type: application/json" \
+          --user "$AIRFLOW_USERNAME:$AIRFLOW_PASSWORD" \
+          -d '{"conf": {}}'
