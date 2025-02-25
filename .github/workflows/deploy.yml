@@ -39,11 +39,11 @@ jobs:
 
       - name: Upload DAG to GCP Bucket
         run: |
-          gsutil cp dags/hello_world_dag.py gs://github-act/dags/
+          gsutil cp /Users/zymberg/Desktop/github-jenkins/dags/hello_world_dag.py gs://github-act/dags/
 
       - name: Upload JAR to GCP Bucket
         run: |
-          gsutil cp target/scala-2.12/*.jar gs://github-act/jars/
+          gsutil cp /Users/zymberg/Desktop/github-jenkins/target/scala-2.13/*.jar gs://github-act/jars/
 
       - name: Trigger Airflow DAG Run (Optional)
         env:
