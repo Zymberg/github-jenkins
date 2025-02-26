@@ -7,7 +7,12 @@ on:
     paths:
       - "dags/**"
       - "src/**"
-      
+
+env:
+  BQ_PROJECT_DEV: ${{ secrets.project_id }}
+  KEYFILE_CONTENTS: ${{ secrets.GCP_SA_KEY }}
+  BQ_KEYFILE: /tmp/google/google-service-account.json
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -35,10 +40,10 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Check GCS Access
-        run: |
-          echo "Checking GCS access:"
-          gsutil ls gs://github-act
+      - name: Prep Google Keyfile
+        run: | 
+          mkdir -p "$(dirname $BQ_KEYFILE)" 
+          echo "$KEYFILE_CONTENTS" > $BQ_KEYFILE
 
       - name: List files in DAGs directory
         run: |
