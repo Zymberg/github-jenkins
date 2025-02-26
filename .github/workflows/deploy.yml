@@ -28,9 +28,7 @@ jobs:
           apps: sbt
 
       - name: Build JAR with SBT
-        run: |
-          sbt clean assembly
-        working-directory: .
+        run: sbt clean assembly
 
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v1
@@ -38,15 +36,13 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: List files in dags directory
-        run: ls -alh dags/
+        run: ls -alh $GITHUB_WORKSPACE/dags/
 
       - name: Upload DAG to GCP Bucket
-        run: |
-          gsutil cp ./dags/hello_world_dag.py gs://github-act/dags/
+        run: gsutil cp $GITHUB_WORKSPACE/dags/hello_world_dag.py gs://github-act/dags/
 
       - name: Upload JAR to GCP Bucket
-        run: |
-          gsutil cp ./target/scala-2.13/*.jar gs://github-act/jars/
+        run: gsutil cp $GITHUB_WORKSPACE/target/scala-2.13/*.jar gs://github-act/jars/
 
       - name: Trigger Airflow DAG Run (Optional)
         env:
