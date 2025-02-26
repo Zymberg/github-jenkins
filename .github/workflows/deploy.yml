@@ -32,6 +32,7 @@ jobs:
 
       - name: Print Current Active Account
         run: |
+          gcloud auth login gzymeri55@gmail.com
           echo "Current active account before authentication:"
           gcloud config get-value account || echo "No active account set"
 
@@ -39,15 +40,6 @@ jobs:
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Verify Authentication
-        run: |
-          echo "Authenticated accounts:"
-          gcloud auth list
-          echo "Active account:"
-          gcloud config get-value account
-          echo "Google Application Credentials:"
-          echo $GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Check GCS Access
         run: |
